@@ -16,7 +16,7 @@ let connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId);    
+    console.log("connected as id " + connection.threadId);
 
     mainMenu();
 });
@@ -29,8 +29,8 @@ const mainMenu = () => {
             type: 'list',
             choices: ['ADD, CHANGE or REMOVE DATA', 'VIEW DATA', 'EXIT APPLICATION']
         }
-    ]).then(function({ menuChoice }) {
-        switch(menuChoice) {
+    ]).then(function ({ menuChoice }) {
+        switch (menuChoice) {
             case 'ADD, CHANGE or REMOVE DATA':
                 updateData();
                 break;
@@ -45,9 +45,61 @@ const mainMenu = () => {
 }
 
 const updateData = () => {
-    console.log('ADD, CHANGE or REMOVE DATA');
+    inquirer.prompt([
+        {
+            message: 'What would you like to do?',
+            name: 'updateChoice',
+            type: 'list',
+            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Go Back']
+        }
+    ]).then(function ({ updateChoice }) {
+        switch (updateChoice) {
+            case 'Add Employee':
+                console.log('Add Employee');
+                mainMenu();
+                break;
+            case 'Add Role':
+                console.log('Add Role');
+                mainMenu();
+                break;
+            case 'Add Department':
+                console.log('Add Dept');
+                mainMenu();
+                break;
+            case 'Update Employee Role':
+                console.log('Update Employee Role');
+                mainMenu();
+                break;
+            case 'Go Back':
+                mainMenu();
+        }
+    });
 }
 
 const viewData = () => {
-    console.log('VIEW DATA');
+    inquirer.prompt([
+        {
+            message: 'What would you like to do?',
+            name: 'viewChoice',
+            type: 'list',
+            choices: ['View All Employees', 'View All Roles', 'View All Departments', 'Go Back']
+        }
+    ]).then(function ({ viewChoice }) {
+        switch (viewChoice) {
+            case 'View All Employees':
+                console.log('View All Employees');
+                mainMenu();
+                break;
+            case 'View All Roles':
+                console.log('View All Roles');
+                mainMenu();
+                break;
+            case 'View All Departments':
+                console.log('View All Departments');
+                mainMenu();
+                break;
+            case 'Go Back':
+                mainMenu();
+        }
+    });
 }
