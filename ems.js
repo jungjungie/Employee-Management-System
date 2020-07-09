@@ -55,7 +55,7 @@ const updateData = () => {
     ]).then(function ({ updateChoice }) {
         switch (updateChoice) {
             case 'Add Employee':
-                console.log('Add Employee');
+                addEmployee();
                 mainMenu();
                 break;
             case 'Add Role':
@@ -87,19 +87,39 @@ const viewData = () => {
     ]).then(function ({ viewChoice }) {
         switch (viewChoice) {
             case 'View All Employees':
-                console.log('View All Employees');
-                mainMenu();
+                viewEmployees();
                 break;
             case 'View All Roles':
-                console.log('View All Roles');
-                mainMenu();
+                viewRoles();
                 break;
             case 'View All Departments':
-                console.log('View All Departments');
-                mainMenu();
+                viewDepts();
                 break;
             case 'Go Back':
                 mainMenu();
         }
     });
+}
+
+const viewEmployees = () => {
+    let query = "SELECT employees.id, employees.first_name, employees.last_name, roles.position_title, departments.department, roles.salary, employees.manager_id FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.dept_id = departments.id";
+    accessSQL(query);
+}
+
+const viewRoles = () => {
+    let query = "SELECT roles.id, roles.position_title, roles.salary, departments.department FROM roles INNER JOIN departments ON roles.dept_id = departments.id";
+    accessSQL(query);
+}
+
+const viewDepts = () => {
+    let query = "SELECT * FROM departments";
+    accessSQL(query);
+}
+
+const accessSQL = query => {
+    connection.query(query, (err, data) => {
+        if (err) throw err;
+        console.log('\n\n' + cTable.getTable(data));
+        mainMenu();
+    })
 }
