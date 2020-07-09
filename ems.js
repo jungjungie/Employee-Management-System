@@ -16,7 +16,15 @@ let connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId);
+    
+    console.log('================================================\n');
+    console.log(figlet.textSync('            EMS', {
+        font: 'big',
+        horizontalLayout: 'default',
+        verticalLayout: 'default'
+    }));
+    console.log("        -- Employee Management System --\n");
+    console.log('================================================\n');
 
     mainMenu();
 });
