@@ -17,4 +17,37 @@ let connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);    
+
+    mainMenu();
 });
+
+const mainMenu = () => {
+    inquirer.prompt([
+        {
+            message: 'Please select an option below:',
+            name: 'menuChoice',
+            type: 'list',
+            choices: ['ADD, CHANGE or REMOVE DATA', 'VIEW DATA', 'EXIT APPLICATION']
+        }
+    ]).then(function({ menuChoice }) {
+        switch(menuChoice) {
+            case 'ADD, CHANGE or REMOVE DATA':
+                updateData();
+                break;
+            case 'VIEW DATA':
+                viewData();
+                break;
+            case 'EXIT APPLICATION':
+                connection.end();
+                break;
+        }
+    });
+}
+
+const updateData = () => {
+    console.log('ADD, CHANGE or REMOVE DATA');
+}
+
+const viewData = () => {
+    console.log('VIEW DATA');
+}
