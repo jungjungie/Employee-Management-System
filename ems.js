@@ -29,6 +29,7 @@ connection.connect(function (err) {
     mainMenu();
 });
 
+// Function to prompt main menu options
 const mainMenu = () => {
     inquirer.prompt([
         {
@@ -52,6 +53,7 @@ const mainMenu = () => {
     });
 }
 
+// Function to prompt choices for adding, changing or removing data
 const updateData = () => {
     inquirer.prompt([
         {
@@ -66,8 +68,7 @@ const updateData = () => {
                 addEmployee();
                 break;
             case 'Add Role':
-                console.log('Add Role');
-                mainMenu();
+                addRole();
                 break;
             case 'Add Department':
                 addDept();
@@ -79,6 +80,87 @@ const updateData = () => {
             case 'Go Back':
                 mainMenu();
         }
+    });
+}
+
+// Function to add new role
+const addRole = () => {
+    connection.query("SELECT * FROM departments", function(err, data) {
+        if(err) throw err;
+
+        let deptChoices = [];
+        let deptIds = [];
+        
+        for(let i = 0; i < data.length; i++) {
+            deptChoices.push(data[i].department);
+            deptIds.push(data[i].id);
+        }
+
+        inquirer.prompt([
+            {
+                message: 'Enter the position title for the new role:',
+                name: 'newRole',
+                type: 'input'
+            },
+            {
+                message: 'Enter the salary for the new role:',
+                name: 'salary',
+                type: 'number'
+            },
+            {
+                message: 'Select the new role\'s department:',
+                name: 'dept',
+                type: 'list',
+                choices: deptChoices
+            }
+        ]).then(function ({ newRole, salary, dept }) {
+            connection.query("SELECT position_title FROM roles", function(err, data) {
+                if (err) throw err;
+                let deptId;
+
+                // Selects the dept id of the department selected
+                for (let i=0; i < deptChoices.length; i++) {
+                    if (dept === deptChoices[i]) {
+                        deptId = deptIds[i];
+                    }
+                }
+
+                // If no roles currently exist, then adds the new role
+                if (data.length === 0) {
+                    connection.query("INSERT INTO roles (position_title, salary, dept_id) VALUES (?, ?, ?)", [newRole, salary, deptId], function(err, data) {
+                        if(err) throw err;              
+                        console.log(`\n---------------------------------------------------\n`);     
+                        console.log(`\nNEW POSITION SUCCESSFULLY ADDED: ${ newRole }\n`);
+                        console.log(`Salary: ${ salary }\n`);
+                        console.log(`Department: ${ dept }\n`);
+                        console.log(`\n---------------------------------------------------\n`);     
+            
+                        mainMenu();
+                    });
+                } else {
+                // Loops through to check for new role in database and returns an error if it already exists
+                    for (let i=0; i < data.length; i++) {
+                        if (newRole === data[i].position_title) {
+                            console.log(`\n---------------------------------------------------\n`);     
+                            console.log(`\nERROR: The position title ${data[i].position_title} already exists. Please try again.\n`);
+                            console.log(`\n---------------------------------------------------\n`);     
+                            addRole();
+                            return;
+                        }
+                    }
+                // Adds new role to the database if it does not already exist in database
+                    connection.query("INSERT INTO roles (position_title, salary, dept_id) VALUES (?, ?, ?)", [newRole, salary, deptId], function(err, data) {
+                        if(err) throw err;
+                        console.log(`\n---------------------------------------------------\n`);     
+                        console.log(`\nNEW POSITION SUCCESSFULLY ADDED: ${ newRole }\n`);
+                        console.log(`Salary: ${ salary }\n`);
+                        console.log(`Department: ${ dept }\n`);
+                        console.log(`\n---------------------------------------------------\n`);     
+                        mainMenu();
+                    });
+                }
+            })
+        });
     });
 }
 
