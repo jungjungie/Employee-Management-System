@@ -108,6 +108,22 @@ const addEmployee = () => {
             }
         })
 
+        data.forEach(({employeeID, employee}, i) => {
+            // Pulls the employeeID and employee and creates a new object if the values are not null
+            if (employeeID && employee){
+                const uniqueEmployee = {
+                    name: employee,
+                    value: employeeID
+                }  
+                //Determines if this is the first occurrence of the role in the array and pushes it to mgrChoices if it is
+                const index = data.findIndex(employeeObj => employeeObj.employeeID === employeeID);
+
+                if (index === i) {
+                    mgrChoices.push(uniqueEmployee);
+                } 
+            }
+        })
+
         inquirer.prompt([
             {
                 message: 'Enter the employee\'s first name:',
@@ -129,7 +145,7 @@ const addEmployee = () => {
                 message: 'Enter the employee\'s manager:',
                 name: 'manager',
                 type: 'list',
-                choices: [{name: 'Jane Miller', value: 1}]
+                choices: mgrChoices
             }
         ]).then(function({ firstName, lastName, role, manager}) {
             console.log(firstName, lastName, role, manager);
