@@ -83,6 +83,69 @@ const updateData = () => {
     });
 }
 
+// Function to add new employee
+const addEmployee = () => {
+    connection.query("SELECT roles.id AS roleID, roles.position_title AS role, employees.id AS employeeID, CONCAT(employees.first_name, ' ', employees.last_name) AS employee FROM employees RIGHT OUTER JOIN roles ON employees.role_id = roles.id", function(err, data) {
+        if(err) throw err;
+        // console.log(data);
+
+        let roleChoices = [];
+        let mgrChoices = [];
+
+        data.forEach(({roleID, role}, i) => {
+            // Pulls the roleID and role and creates a new object if the values are not null
+            if (roleID && role){
+                const uniqueRole = {
+                    name: role,
+                    value: roleID
+                }  
+                //Determines if this is the first occurrence of the role in the array and pushes it to roleChoices if it is
+                const index = data.findIndex(roleObj => roleObj.roleID === roleID);
+
+                if (index === i) {
+                    roleChoices.push(uniqueRole);
+                } 
+            }
+        })
+
+        inquirer.prompt([
+            {
+                message: 'Enter the employee\'s first name:',
+                name: 'firstName',
+                type: 'input'
+            },
+            {
+                message: 'Enter the employee\'s last name:',
+                name: 'lastName',
+                type: 'input'
+            },
+            {
+                message: 'Enter the employee\'s role:',
+                name: 'role',
+                type: 'list',
+                choices: roleChoices
+            },
+            {
+                message: 'Enter the employee\'s manager:',
+                name: 'manager',
+                type: 'list',
+                choices: [{name: 'Jane Miller', value: 1}]
+            }
+        ]).then(function({ firstName, lastName, role, manager}) {
+            console.log(firstName, lastName, role, manager);
+
+            // Adds the new employee into database
+            connection.query("INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [firstName, lastName, role, manager], function(err, data) {
+                if(err) throw err;
+                console.log(`\n---------------------------------------------------\n`);     
+                console.log(`\nNEW EMPLOYEE SUCCESSFULLY ADDED: ${ firstName } ${ lastName }\n`);
+                console.log(`\n---------------------------------------------------\n`);     
+                mainMenu();
+            });
+        });
+    });
+}
+
 // Function to add new role
 const addRole = () => {
     connection.query("SELECT * FROM departments", function(err, data) {
