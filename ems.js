@@ -60,7 +60,7 @@ const updateData = () => {
             message: 'What would you like to do?',
             name: 'updateChoice',
             type: 'list',
-            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Remove Employee', 'Remove Role', 'Go Back']
+            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Remove Employee', 'Remove Role', 'Remove Department', 'Go Back']
         }
     ]).then(function ({ updateChoice }) {
         switch (updateChoice) {
@@ -81,6 +81,9 @@ const updateData = () => {
                 break;
             case 'Remove Role':
                 removeRole();
+                break;
+            case 'Remove Department':
+                removeDept();
                 break;
             case 'Go Back':
                 mainMenu();
@@ -439,6 +442,48 @@ const removeRole = () => {
                 if (err) throw err;
                 console.log(`\n---------------------------------------------------\n`);
                 console.log(`\nROLE SUCCESSFULLY REMOVED FROM DATABASE\n`);
+                console.log(`\n---------------------------------------------------\n`);
+                mainMenu();
+            });
+        });
+    });
+}
+
+// Function to remove dept
+const removeDept = () => {
+    console.log(`\n---------------------------------------------------\n`);
+    console.log(`\nWARNING: A department deletion will result in the deletion of any roles and employees who are currently in that department. Please proceed with caution.\n`);
+    console.log(`\n---------------------------------------------------\n`);
+
+    connection.query("SELECT departments.id AS deptID, departments.department AS dept FROM departments", function (err, data) {
+        if (err) throw err;
+
+        let deptChoices = [];
+
+        // Pulls the dept ID and department and creates a new object that sets the department as prompt choices but returns the dept ID as the value selected
+        data.forEach(({ deptID, dept }, i) => {
+            const uniqueDept = {
+                name: dept,
+                value: deptID
+            }
+            deptChoices.push(uniqueDept);
+        })
+
+        inquirer.prompt([
+            {
+                message: 'Which department do you want to remove?',
+                name: 'dept',
+                type: 'list',
+                choices: deptChoices
+            }
+        ]).then(function ({ dept }) {
+            // Removes the dept selected from database
+            connection.query("DELETE FROM departments WHERE ?", [
+                { id: dept }
+            ], function (err, data) {
+                if (err) throw err;
+                console.log(`\n---------------------------------------------------\n`);
+                console.log(`\nDEPARTMENT SUCCESSFULLY REMOVED FROM DATABASE\n`);
                 console.log(`\n---------------------------------------------------\n`);
                 mainMenu();
             });
