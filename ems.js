@@ -60,7 +60,7 @@ const updateData = () => {
             message: 'What would you like to do?',
             name: 'updateChoice',
             type: 'list',
-            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Go Back']
+            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Remove Employee','Go Back']
         }
     ]).then(function ({ updateChoice }) {
         switch (updateChoice) {
@@ -75,6 +75,9 @@ const updateData = () => {
                 break;
             case 'Update Employee Role':
                 updateEmployeeRole();
+                break;
+            case 'Remove Employee':
+                removeEmployee();
                 break;
             case 'Go Back':
                 mainMenu();
@@ -289,7 +292,6 @@ const addDept = () => {
 }
 
 // Function to update employee's role
-// Update employee's mgr, role, name
 const updateEmployeeRole = () => {
     connection.query("SELECT roles.id AS roleID, roles.position_title AS role, employees.id AS employeeID, CONCAT(employees.first_name, ' ', employees.last_name) AS employee FROM employees RIGHT OUTER JOIN roles ON employees.role_id = roles.id", function (err, data) {
         if (err) throw err;
@@ -352,6 +354,52 @@ const updateEmployeeRole = () => {
                 if (err) throw err;
                 console.log(`\n---------------------------------------------------\n`);
                 console.log(`\nEMPLOYEE DATA SUCCESSFULLY UPDATED\n`);
+                console.log(`\n---------------------------------------------------\n`);
+                mainMenu();
+            });
+        });
+    });
+}
+
+// Function to remove employee
+const removeEmployee = () => {
+    connection.query("SELECT employees.id AS employeeID, CONCAT(employees.first_name, ' ', employees.last_name) AS employee FROM employees", function (err, data) {
+        if (err) throw err;
+        // console.log(data);
+
+        let employeeChoices = [];
+
+        data.forEach(({ employeeID, employee }, i) => {
+            // Pulls the employeeID and employee and creates a new object if the values are not null
+            if (employeeID && employee) {
+                const uniqueEmployee = {
+                    name: employee,
+                    value: employeeID
+                }
+                //Determines if this is the first occurrence of the role in the array and pushes it to employeeChoices if it is
+                const index = data.findIndex(employeeObj => employeeObj.employeeID === employeeID);
+
+                if (index === i) {
+                    employeeChoices.push(uniqueEmployee);
+                }
+            }
+        })
+
+        inquirer.prompt([
+            {
+                message: 'Which employee do you want to remove?',
+                name: 'employee',
+                type: 'list',
+                choices: employeeChoices
+            }
+        ]).then(function ({ employee }) {
+            // Removes the employee selected from database
+            connection.query("DELETE FROM employees WHERE ?", [
+                { id: employee }
+            ], function (err, data) {
+                if (err) throw err;
+                console.log(`\n---------------------------------------------------\n`);
+                console.log(`\nEMPLOYEE SUCCESSFULLY REMOVED FROM DATABASE\n`);
                 console.log(`\n---------------------------------------------------\n`);
                 mainMenu();
             });
