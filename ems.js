@@ -236,7 +236,7 @@ const viewData = () => {
 }
 
 const viewEmployees = () => {
-    let query = "SELECT employees.id, employees.first_name, employees.last_name, roles.position_title, departments.department, roles.salary, employees.manager_id FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.dept_id = departments.id";
+    let query = "SELECT employees.id, employees.first_name, employees.last_name, roles.position_title, departments.department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.dept_id = departments.id LEFT JOIN employees as manager ON manager.id = employees.manager_id";
     accessSQL(query);
 }
 
@@ -253,6 +253,9 @@ const viewDepts = () => {
 const accessSQL = query => {
     connection.query(query, (err, data) => {
         if (err) throw err;
+
+        // make new array and rebuild data in it, or try map function and toFixed()
+        let formattedArr = [];
 
         // Returns 'no data exists' if there is no data
         if (data.length === 0) {
