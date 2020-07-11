@@ -366,26 +366,20 @@ const updateEmployeeRole = () => {
 
 // Function to remove employee
 const removeEmployee = () => {
+    console.log(`\n---------------------------------------------------\n`);
+    console.log(`\nWARNING: You are about to delete an employee from the database. Please proceed with caution.\n`);
+    console.log(`\n---------------------------------------------------\n`);
     connection.query("SELECT employees.id AS employeeID, CONCAT(employees.first_name, ' ', employees.last_name) AS employee FROM employees", function (err, data) {
         if (err) throw err;
-        // console.log(data);
 
         let employeeChoices = [];
 
         data.forEach(({ employeeID, employee }, i) => {
-            // Pulls the employeeID and employee and creates a new object if the values are not null
-            if (employeeID && employee) {
-                const uniqueEmployee = {
-                    name: employee,
-                    value: employeeID
-                }
-                //Determines if this is the first occurrence of the role in the array and pushes it to employeeChoices if it is
-                const index = data.findIndex(employeeObj => employeeObj.employeeID === employeeID);
-
-                if (index === i) {
-                    employeeChoices.push(uniqueEmployee);
-                }
+            const uniqueEmployee = {
+                name: employee,
+                value: employeeID
             }
+            employeeChoices.push(uniqueEmployee);
         })
 
         inquirer.prompt([
