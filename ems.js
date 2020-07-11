@@ -60,7 +60,7 @@ const updateData = () => {
             message: 'What would you like to do?',
             name: 'updateChoice',
             type: 'list',
-            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Remove Employee','Go Back']
+            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Remove Employee', 'Remove Role', 'Go Back']
         }
     ]).then(function ({ updateChoice }) {
         switch (updateChoice) {
@@ -78,6 +78,9 @@ const updateData = () => {
                 break;
             case 'Remove Employee':
                 removeEmployee();
+                break;
+            case 'Remove Role':
+                removeRole();
                 break;
             case 'Go Back':
                 mainMenu();
@@ -407,6 +410,49 @@ const removeEmployee = () => {
     });
 }
 
+// Function to remove role
+const removeRole = () => {
+    console.log(`\n---------------------------------------------------\n`);
+    console.log(`\nWARNING: A role deletion will result in the deletion of any employees who are currently in the role selected. Please proceed with caution.\n`);
+    console.log(`\n---------------------------------------------------\n`);
+
+    connection.query("SELECT roles.id AS roleID, roles.position_title AS role FROM roles", function (err, data) {
+        if (err) throw err;
+
+        let roleChoices = [];
+
+        // Pulls the role ID and position title and creates a new object that sets the position title as prompt choices but returns the role ID as the value selected
+        data.forEach(({ roleID, role }, i) => {
+            const uniqueRole = {
+                name: role,
+                value: roleID
+            }
+            roleChoices.push(uniqueRole);
+        })
+
+        inquirer.prompt([
+            {
+                message: 'Which role do you want to remove?',
+                name: 'role',
+                type: 'list',
+                choices: roleChoices
+            }
+        ]).then(function ({ role }) {
+            // Removes the role selected from database
+            connection.query("DELETE FROM roles WHERE ?", [
+                { id: role }
+            ], function (err, data) {
+                if (err) throw err;
+                console.log(`\n---------------------------------------------------\n`);
+                console.log(`\nROLE SUCCESSFULLY REMOVED FROM DATABASE\n`);
+                console.log(`\n---------------------------------------------------\n`);
+                mainMenu();
+            });
+        });
+    });
+}
+
+// Function to prompt choices for viewing data
 const viewData = () => {
     inquirer.prompt([
         {
@@ -432,21 +478,25 @@ const viewData = () => {
     });
 }
 
+// Function to view all employee data
 const viewEmployees = () => {
     let query = "SELECT employees.id, employees.first_name, employees.last_name, roles.position_title, departments.department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.dept_id = departments.id LEFT JOIN employees as manager ON manager.id = employees.manager_id";
     accessSQL(query);
 }
 
+// Function to view all role data
 const viewRoles = () => {
     let query = "SELECT roles.id, roles.position_title, roles.salary, departments.department FROM roles INNER JOIN departments ON roles.dept_id = departments.id";
     accessSQL(query);
 }
 
+// Function to view all department data
 const viewDepts = () => {
     let query = "SELECT * FROM departments";
     accessSQL(query);
 }
 
+// Function to pull data from SQL for different data view options
 const accessSQL = query => {
     connection.query(query, (err, data) => {
         if (err) throw err;
