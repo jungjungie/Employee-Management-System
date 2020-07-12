@@ -161,7 +161,7 @@ const addEmployee = () => {
             // Adds the new employee into database
             connection.query("INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [firstName, lastName, role, manager], function (err, data) {
                 if (err) throw err;
-                console.log(`\n---------------------------------------------------\n`);
+                console.log(`\x1b[33m\n---------------------------------------------------\n`);
                 console.log(`\nNEW EMPLOYEE SUCCESSFULLY ADDED: ${firstName} ${lastName}\n`);
                 console.log(`\n---------------------------------------------------\n`);
                 mainMenu();
@@ -216,7 +216,7 @@ const addRole = () => {
                 if (data.length === 0) {
                     connection.query("INSERT INTO roles (position_title, salary, dept_id) VALUES (?, ?, ?)", [newRole, salary, deptId], function (err, data) {
                         if (err) throw err;
-                        console.log(`\n---------------------------------------------------\n`);
+                        console.log(`\x1b[33m\n---------------------------------------------------\n`);
                         console.log(`\nNEW POSITION SUCCESSFULLY ADDED: ${newRole}\n`);
                         console.log(`Salary: ${salary}\n`);
                         console.log(`Department: ${dept}\n`);
@@ -228,7 +228,7 @@ const addRole = () => {
                     // Loops through to check for new role in database and returns an error if it already exists
                     for (let i = 0; i < data.length; i++) {
                         if (newRole === data[i].position_title) {
-                            console.log(`\n---------------------------------------------------\n`);
+                            console.log(`\x1b[31m\n---------------------------------------------------\n`);
                             console.log(`\nERROR: The position title ${data[i].position_title} already exists. Please try again.\n`);
                             console.log(`\n---------------------------------------------------\n`);
                             addRole();
@@ -238,7 +238,7 @@ const addRole = () => {
                     // Adds new role to the database if it does not already exist in database
                     connection.query("INSERT INTO roles (position_title, salary, dept_id) VALUES (?, ?, ?)", [newRole, salary, deptId], function (err, data) {
                         if (err) throw err;
-                        console.log(`\n---------------------------------------------------\n`);
+                        console.log(`\x1b[33m\n---------------------------------------------------\n`);
                         console.log(`\nNEW POSITION SUCCESSFULLY ADDED: ${newRole}\n`);
                         console.log(`Salary: ${salary}\n`);
                         console.log(`Department: ${dept}\n`);
@@ -267,7 +267,7 @@ const addDept = () => {
             if (data.length === 0) {
                 connection.query("INSERT INTO departments (department) VALUES (?)", [newDept], function (err, data) {
                     if (err) throw err;
-                    console.log(`\n---------------------------------------------------\n`);
+                    console.log(`\x1b[33m\n---------------------------------------------------\n`);
                     console.log(`\nNEW DEPARTMENT SUCCESSFULLY ADDED: ${newDept}\n`);
                     console.log(`\n---------------------------------------------------\n`);
 
@@ -277,7 +277,7 @@ const addDept = () => {
                 // Loops through to check for new dept name in database and returns an error if it already exists
                 for (let i = 0; i < data.length; i++) {
                     if (newDept === data[i].department) {
-                        console.log(`\n---------------------------------------------------\n`);
+                        console.log(`\x1b[31m\n---------------------------------------------------\n`);
                         console.log(`\nERROR: A ${data[i].department} department already exists. Please try again.\n`);
                         console.log(`\n---------------------------------------------------\n`);
                         addDept();
@@ -287,7 +287,7 @@ const addDept = () => {
                 // Adds new dept to the database if it does not already exist in database
                 connection.query("INSERT INTO departments (department) VALUES (?)", [newDept], function (err, data) {
                     if (err) throw err;
-                    console.log(`\n---------------------------------------------------\n`);
+                    console.log(`\x1b[33m\n---------------------------------------------------\n`);
                     console.log(`\nNEW DEPARTMENT SUCCESSFULLY ADDED: ${newDept}\n`);
                     console.log(`\n---------------------------------------------------\n`);
                     mainMenu();
@@ -358,7 +358,7 @@ const updateEmployeeRole = () => {
                 { id: employee }
             ], function (err, data) {
                 if (err) throw err;
-                console.log(`\n---------------------------------------------------\n`);
+                console.log(`\x1b[32m\n---------------------------------------------------\n`);
                 console.log(`\nEMPLOYEE DATA SUCCESSFULLY UPDATED\n`);
                 console.log(`\n---------------------------------------------------\n`);
                 mainMenu();
@@ -369,8 +369,9 @@ const updateEmployeeRole = () => {
 
 // Function to remove employee
 const removeEmployee = () => {
-    console.log(`\n---------------------------------------------------\n`);
-    console.log(`\nWARNING: You are about to delete an employee from the database. Please proceed with caution.\n`);
+    console.log(`\x1b[31m\n---------------------------------------------------\n`);
+    console.log(`\nWARNING:\n`);
+    console.log(`You are about to delete an employee from the database. Please proceed with caution.\n`);
     console.log(`\n---------------------------------------------------\n`);
     connection.query("SELECT employees.id AS employeeID, CONCAT(employees.first_name, ' ', employees.last_name) AS employee FROM employees", function (err, data) {
         if (err) throw err;
@@ -409,8 +410,9 @@ const removeEmployee = () => {
 
 // Function to remove role
 const removeRole = () => {
-    console.log(`\n---------------------------------------------------\n`);
-    console.log(`\nWARNING: A role deletion will result in the deletion of any employees who are currently in the role selected. Please proceed with caution.\n`);
+    console.log(`\x1b[31m\n---------------------------------------------------\n`);
+    console.log(`\nWARNING:\n`);
+    console.log(`A role deletion will result in the deletion of any employees who are currently in that role. Please proceed with caution.\n`);
     console.log(`\n---------------------------------------------------\n`);
 
     connection.query("SELECT roles.id AS roleID, roles.position_title AS role FROM roles", function (err, data) {
@@ -451,8 +453,9 @@ const removeRole = () => {
 
 // Function to remove dept
 const removeDept = () => {
-    console.log(`\n---------------------------------------------------\n`);
-    console.log(`\nWARNING: A department deletion will result in the deletion of any roles and employees who are currently in that department. Please proceed with caution.\n`);
+    console.log(`\x1b[31m\n---------------------------------------------------\n`);
+    console.log(`\nWARNING:\n`);
+    console.log(`A department deletion will result in the deletion of any roles and employees who are currently in that department. Please proceed with caution.\n`);
     console.log(`\n---------------------------------------------------\n`);
 
     connection.query("SELECT departments.id AS deptID, departments.department AS dept FROM departments", function (err, data) {
@@ -545,13 +548,13 @@ const accessSQL = query => {
 
         // Returns 'no data exists' if there is no data
         if (data.length === 0) {
-            console.log(`\n---------------------------------------------------\n`);
+            console.log(`\x1b[33m\n---------------------------------------------------\n`);
             console.log('No data exists.')
             console.log(`\n---------------------------------------------------\n`);
             mainMenu();
         } else {
             // Returns available data
-            console.log(`\n---------------------------------------------------\n\n`);
+            console.log(`\x1b[32m\n---------------------------------------------------\n\n`);
             console.log(cTable.getTable(data));
             console.log(`---------------------------------------------------\n`);
             mainMenu();
