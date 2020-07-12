@@ -578,19 +578,19 @@ const viewData = () => {
 
 // Function to view all employee data
 const viewEmployees = () => {
-    let query = "SELECT employees.id, employees.first_name, employees.last_name, roles.position_title, departments.department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.dept_id = departments.id LEFT JOIN employees as manager ON manager.id = employees.manager_id ORDER BY employees.first_name ASC";
+    let query = "SELECT employees.id AS ID, employees.first_name AS 'First Name', employees.last_name AS 'Last Name', roles.position_title AS 'Position Title', departments.department as Department, roles.salary as Salary, CONCAT(manager.first_name, ' ', manager.last_name) AS Manager FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.dept_id = departments.id LEFT JOIN employees as manager ON manager.id = employees.manager_id ORDER BY employees.first_name ASC";
     accessSQL(query);
 }
 
 // Function to view all role data
 const viewRoles = () => {
-    let query = "SELECT roles.id, roles.position_title, roles.salary, departments.department FROM roles INNER JOIN departments ON roles.dept_id = departments.id ORDER BY roles.dept_id, roles.position_title ASC";
+    let query = "SELECT roles.id as ID, roles.position_title as 'Position Title', roles.salary as Salary, departments.department as Department FROM roles INNER JOIN departments ON roles.dept_id = departments.id ORDER BY roles.dept_id, roles.position_title ASC";
     accessSQL(query);
 }
 
 // Function to view all department data
 const viewDepts = () => {
-    let query = "SELECT * FROM departments ORDER BY departments.id ASC";
+    let query = "SELECT departments.id as ID, departments.department as Department FROM departments ORDER BY departments.id ASC";
     accessSQL(query);
 }
 
