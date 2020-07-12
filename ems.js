@@ -17,7 +17,7 @@ let connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
 
-    console.log('================================================\n');
+    console.log('\x1b[36m================================================\n');
     console.log(figlet.textSync('            EMS', {
         font: 'big',
         horizontalLayout: 'default',
@@ -47,6 +47,13 @@ const mainMenu = () => {
                 viewData();
                 break;
             case 'EXIT APPLICATION':
+                console.log('\x1b[36m===================================================\n');
+                console.log(figlet.textSync('GOODBYE', {
+                    font: 'big',
+                    horizontalLayout: 'default',
+                    verticalLayout: 'default'
+                }));
+                console.log('===================================================\n');
                 connection.end();
                 break;
         }
@@ -60,7 +67,7 @@ const updateData = () => {
             message: 'What would you like to do?',
             name: 'updateChoice',
             type: 'list',
-            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Remove Employee', 'Remove Role', 'Remove Department', 'Go Back']
+            choices: ['Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Update Employee Manager', 'Remove Employee', 'Remove Role', 'Remove Department', 'Go Back']
         }
     ]).then(function ({ updateChoice }) {
         switch (updateChoice) {
@@ -75,6 +82,9 @@ const updateData = () => {
                 break;
             case 'Update Employee Role':
                 updateEmployeeRole();
+                break;
+            case 'Update Employee Manager':
+                updateEmployeeMgr();
                 break;
             case 'Remove Employee':
                 removeEmployee();
@@ -93,7 +103,7 @@ const updateData = () => {
 
 // Function to add new employee
 const addEmployee = () => {
-    connection.query("SELECT roles.id AS roleID, roles.position_title AS role, employees.id AS employeeID, CONCAT(employees.first_name, ' ', employees.last_name) AS employee FROM employees RIGHT OUTER JOIN roles ON employees.role_id = roles.id", function (err, data) {
+    connection.query("SELECT roles.id AS roleID, roles.position_title AS role, employees.id AS employeeID, CONCAT(employees.first_name, ' ', employees.last_name) AS employee FROM employees RIGHT OUTER JOIN roles ON employees.role_id = roles.id ORDER BY employee, role ASC", function (err, data) {
         if (err) throw err;
         // console.log(data);
 
@@ -156,12 +166,12 @@ const addEmployee = () => {
                 choices: mgrChoices
             }
         ]).then(function ({ firstName, lastName, role, manager }) {
-            console.log(firstName, lastName, role, manager);
+            // console.log(firstName, lastName, role, manager);
 
             // Adds the new employee into database
             connection.query("INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [firstName, lastName, role, manager], function (err, data) {
                 if (err) throw err;
-                console.log(`\x1b[33m\n---------------------------------------------------\n`);
+                console.log(`\x1b[32m\n---------------------------------------------------\n`);
                 console.log(`\nNEW EMPLOYEE SUCCESSFULLY ADDED: ${firstName} ${lastName}\n`);
                 console.log(`\n---------------------------------------------------\n`);
                 mainMenu();
@@ -172,7 +182,7 @@ const addEmployee = () => {
 
 // Function to add new role
 const addRole = () => {
-    connection.query("SELECT * FROM departments", function (err, data) {
+    connection.query("SELECT * FROM departments ORDER BY departments.department ASC", function (err, data) {
         if (err) throw err;
 
         let deptChoices = [];
@@ -216,7 +226,7 @@ const addRole = () => {
                 if (data.length === 0) {
                     connection.query("INSERT INTO roles (position_title, salary, dept_id) VALUES (?, ?, ?)", [newRole, salary, deptId], function (err, data) {
                         if (err) throw err;
-                        console.log(`\x1b[33m\n---------------------------------------------------\n`);
+                        console.log(`\x1b[32m\n---------------------------------------------------\n`);
                         console.log(`\nNEW POSITION SUCCESSFULLY ADDED: ${newRole}\n`);
                         console.log(`Salary: ${salary}\n`);
                         console.log(`Department: ${dept}\n`);
@@ -231,14 +241,14 @@ const addRole = () => {
                             console.log(`\x1b[31m\n---------------------------------------------------\n`);
                             console.log(`\nERROR: The position title ${data[i].position_title} already exists. Please try again.\n`);
                             console.log(`\n---------------------------------------------------\n`);
-                            addRole();
+                            mainMenu();
                             return;
                         }
                     }
                     // Adds new role to the database if it does not already exist in database
                     connection.query("INSERT INTO roles (position_title, salary, dept_id) VALUES (?, ?, ?)", [newRole, salary, deptId], function (err, data) {
                         if (err) throw err;
-                        console.log(`\x1b[33m\n---------------------------------------------------\n`);
+                        console.log(`\x1b[32m\n---------------------------------------------------\n`);
                         console.log(`\nNEW POSITION SUCCESSFULLY ADDED: ${newRole}\n`);
                         console.log(`Salary: ${salary}\n`);
                         console.log(`Department: ${dept}\n`);
@@ -267,7 +277,7 @@ const addDept = () => {
             if (data.length === 0) {
                 connection.query("INSERT INTO departments (department) VALUES (?)", [newDept], function (err, data) {
                     if (err) throw err;
-                    console.log(`\x1b[33m\n---------------------------------------------------\n`);
+                    console.log(`\x1b[32m\n---------------------------------------------------\n`);
                     console.log(`\nNEW DEPARTMENT SUCCESSFULLY ADDED: ${newDept}\n`);
                     console.log(`\n---------------------------------------------------\n`);
 
@@ -280,14 +290,14 @@ const addDept = () => {
                         console.log(`\x1b[31m\n---------------------------------------------------\n`);
                         console.log(`\nERROR: A ${data[i].department} department already exists. Please try again.\n`);
                         console.log(`\n---------------------------------------------------\n`);
-                        addDept();
+                        mainMenu();
                         return;
                     }
                 }
                 // Adds new dept to the database if it does not already exist in database
                 connection.query("INSERT INTO departments (department) VALUES (?)", [newDept], function (err, data) {
                     if (err) throw err;
-                    console.log(`\x1b[33m\n---------------------------------------------------\n`);
+                    console.log(`\x1b[32m\n---------------------------------------------------\n`);
                     console.log(`\nNEW DEPARTMENT SUCCESSFULLY ADDED: ${newDept}\n`);
                     console.log(`\n---------------------------------------------------\n`);
                     mainMenu();
@@ -367,6 +377,52 @@ const updateEmployeeRole = () => {
     });
 }
 
+// Function to update employee's manager
+const updateEmployeeMgr = () => {
+    connection.query("SELECT employees.id AS employeeID, CONCAT(employees.first_name, ' ', employees.last_name) AS employee FROM employees ORDER BY employees.first_name ASC", function (err, data) {
+        if (err) throw err;
+        // console.log(data);
+
+        let employeeChoices = [];
+
+        // Pulls the employeeID and employee and creates a new object with name/value keys
+        data.forEach(({ employeeID, employee }, i) => {
+            const uniqueEmployee = {
+                name: employee,
+                value: employeeID
+            }
+            employeeChoices.push(uniqueEmployee);
+        })
+
+        inquirer.prompt([
+            {
+                message: 'Which employee is having a manager change?',
+                name: 'employee',
+                type: 'list',
+                choices: employeeChoices
+            },
+            {
+                message: 'Who is the employee\'s new manager?',
+                name: 'newMgr',
+                type: 'list',
+                choices: employeeChoices
+            }
+        ]).then(function ({ employee, newMgr }) {
+            // Updates the employee's manager in database
+            connection.query("UPDATE employees SET ? WHERE ?", [
+                { manager_id: newMgr },
+                { id: employee }
+            ], function (err, data) {
+                if (err) throw err;
+                console.log(`\x1b[32m\n---------------------------------------------------\n`);
+                console.log(`\nEMPLOYEE DATA SUCCESSFULLY UPDATED\n`);
+                console.log(`\n---------------------------------------------------\n`);
+                mainMenu();
+            });
+        });
+    });
+}
+
 // Function to remove employee
 const removeEmployee = () => {
     console.log(`\x1b[31m\n---------------------------------------------------\n`);
@@ -399,7 +455,7 @@ const removeEmployee = () => {
                 { id: employee }
             ], function (err, data) {
                 if (err) throw err;
-                console.log(`\n---------------------------------------------------\n`);
+                console.log(`\x1b[32m\n---------------------------------------------------\n`);
                 console.log(`\nEMPLOYEE SUCCESSFULLY REMOVED FROM DATABASE\n`);
                 console.log(`\n---------------------------------------------------\n`);
                 mainMenu();
@@ -442,7 +498,7 @@ const removeRole = () => {
                 { id: role }
             ], function (err, data) {
                 if (err) throw err;
-                console.log(`\n---------------------------------------------------\n`);
+                console.log(`\x1b[32m\n---------------------------------------------------\n`);
                 console.log(`\nROLE SUCCESSFULLY REMOVED FROM DATABASE\n`);
                 console.log(`\n---------------------------------------------------\n`);
                 mainMenu();
@@ -485,7 +541,7 @@ const removeDept = () => {
                 { id: dept }
             ], function (err, data) {
                 if (err) throw err;
-                console.log(`\n---------------------------------------------------\n`);
+                console.log(`\x1b[32m\n---------------------------------------------------\n`);
                 console.log(`\nDEPARTMENT SUCCESSFULLY REMOVED FROM DATABASE\n`);
                 console.log(`\n---------------------------------------------------\n`);
                 mainMenu();
@@ -522,19 +578,19 @@ const viewData = () => {
 
 // Function to view all employee data
 const viewEmployees = () => {
-    let query = "SELECT employees.id, employees.first_name, employees.last_name, roles.position_title, departments.department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.dept_id = departments.id LEFT JOIN employees as manager ON manager.id = employees.manager_id";
+    let query = "SELECT employees.id, employees.first_name, employees.last_name, roles.position_title, departments.department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.dept_id = departments.id LEFT JOIN employees as manager ON manager.id = employees.manager_id ORDER BY employees.first_name ASC";
     accessSQL(query);
 }
 
 // Function to view all role data
 const viewRoles = () => {
-    let query = "SELECT roles.id, roles.position_title, roles.salary, departments.department FROM roles INNER JOIN departments ON roles.dept_id = departments.id";
+    let query = "SELECT roles.id, roles.position_title, roles.salary, departments.department FROM roles INNER JOIN departments ON roles.dept_id = departments.id ORDER BY roles.dept_id, roles.position_title ASC";
     accessSQL(query);
 }
 
 // Function to view all department data
 const viewDepts = () => {
-    let query = "SELECT * FROM departments";
+    let query = "SELECT * FROM departments ORDER BY departments.id ASC";
     accessSQL(query);
 }
 
